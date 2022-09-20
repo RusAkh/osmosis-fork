@@ -51,6 +51,7 @@ func (s *TestSuite) TestAfterCreatePool() {
 	}
 
 }
+
 func (s *TestSuite) TestGetSpotPrices() {
 	currTime := time.Now()
 	poolID := s.PrepareBalancerPoolWithCoins(defaultTwoAssetCoins...)
