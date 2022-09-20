@@ -26,47 +26,27 @@ var (
 func (s *TestSuite) TestAfterCreatePool() {
 	ctx := s.Ctx
 	twapKeeper := s.App.TwapKeeper
-	poolID := uint64(1)
+
+	poolAssets := sdk.NewCoins(sdk.NewInt64Coin("bar", 100), sdk.NewInt64Coin("foo", 50))
+	poolId := s.PrepareBalancerPoolWithCoins(poolAssets...)
+	record, _ := twap.NewTwapRecord(twapKeeper.GetAmmInterface(), ctx, poolId, "bar", "foo")
 
 	testCases := map[string]struct {
-		poolID         uint64
-		poolAssets     sdk.Coins
-		expectedTwap   types.TwapRecord
-		expectingPanic bool
-		expectingError error
+		poolID       uint64
+		expectedTwap types.TwapRecord
 	}{
-		"normal test case": {
-			poolID:     poolID,
-			poolAssets: sdk.NewCoins(sdk.NewInt64Coin("foo", 100), sdk.NewInt64Coin("bar", 50)),
-			expectedTwap: types.TwapRecord{
-				PoolId:                      poolID,
-				Asset0Denom:                 "foo",
-				Asset1Denom:                 "bar",
-				Height:                      ctx.BlockHeight(),
-				Time:                        ctx.BlockTime(),
-				P0LastSpotPrice:             sdk.Dec{},
-				P1LastSpotPrice:             sdk.Dec{},
-				P0ArithmeticTwapAccumulator: sdk.ZeroDec(),
-				P1ArithmeticTwapAccumulator: sdk.ZeroDec(),
-				LastErrorTime:               time.Time{},
-			},
+		"check record added": {
+			poolID:       poolId,
+			expectedTwap: record,
 		},
 	}
 
-	// twapKeeper.GetAllMostRecentRecordsForPool(ctx, poolId)
-
 	for name, tc := range testCases {
 		s.Run(name, func() {
-			poolId := s.PrepareBalancerPoolWithCoins(tc.poolAssets...)
+			twapKeeper.AfterCreatePool(ctx, tc.poolID)
+			recentTwapRecords, _ := twapKeeper.GetAllMostRecentRecordsForPool(ctx, tc.poolID)
 
-			err := twapKeeper.AfterCreatePool(ctx, poolId)
-			if err != nil {
-				fmt.Println("add func later")
-			}
-
-			recentRecord, err := twapKeeper.GetAllMostRecentRecordsForPool(ctx, poolId)
-			s.Require().Equal(recentRecord[0], tc.expectedTwap)
-			// fmt.Println(recentRecord)
+			s.Require().Equal(recentTwapRecords[0], tc.expectedTwap)
 		})
 	}
 
