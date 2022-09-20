@@ -23,6 +23,54 @@ var (
 	OneSec  = sdk.MustNewDecFromStr("1000.000000000000000000")
 )
 
+func (s *TestSuite) TestAfterCreatePool() {
+	ctx := s.Ctx
+	twapKeeper := s.App.TwapKeeper
+	poolID := uint64(1)
+
+	testCases := map[string]struct {
+		poolID         uint64
+		poolAssets     sdk.Coins
+		expectedTwap   types.TwapRecord
+		expectingPanic bool
+		expectingError error
+	}{
+		"normal test case": {
+			poolID:     poolID,
+			poolAssets: sdk.NewCoins(sdk.NewInt64Coin("foo", 100), sdk.NewInt64Coin("bar", 50)),
+			expectedTwap: types.TwapRecord{
+				PoolId:                      poolID,
+				Asset0Denom:                 "foo",
+				Asset1Denom:                 "bar",
+				Height:                      ctx.BlockHeight(),
+				Time:                        ctx.BlockTime(),
+				P0LastSpotPrice:             sdk.Dec{},
+				P1LastSpotPrice:             sdk.Dec{},
+				P0ArithmeticTwapAccumulator: sdk.ZeroDec(),
+				P1ArithmeticTwapAccumulator: sdk.ZeroDec(),
+				LastErrorTime:               time.Time{},
+			},
+		},
+	}
+
+	// twapKeeper.GetAllMostRecentRecordsForPool(ctx, poolId)
+
+	for name, tc := range testCases {
+		s.Run(name, func() {
+			poolId := s.PrepareBalancerPoolWithCoins(tc.poolAssets...)
+
+			err := twapKeeper.AfterCreatePool(ctx, poolId)
+			if err != nil {
+				fmt.Println("add func later")
+			}
+
+			recentRecord, err := twapKeeper.GetAllMostRecentRecordsForPool(ctx, poolId)
+			s.Require().Equal(recentRecord[0], tc.expectedTwap)
+			// fmt.Println(recentRecord)
+		})
+	}
+
+}
 func (s *TestSuite) TestGetSpotPrices() {
 	currTime := time.Now()
 	poolID := s.PrepareBalancerPoolWithCoins(defaultTwoAssetCoins...)
@@ -666,15 +714,15 @@ func (s *TestSuite) TestPruneRecords() {
 
 	pool1OlderMin2MsRecord, // deleted
 		pool2OlderMin1MsRecordAB, pool2OlderMin1MsRecordAC, pool2OlderMin1MsRecordBC, // deleted
-		pool3OlderBaseRecord, // kept as newest under keep period
+		pool3OlderBaseRecord,    // kept as newest under keep period
 		pool4OlderPlus1Record := // kept as newest under keep period
-	s.createTestRecordsFromTime(baseTime.Add(2 * -recordHistoryKeepPeriod))
+		s.createTestRecordsFromTime(baseTime.Add(2 * -recordHistoryKeepPeriod))
 
 	pool1Min2MsRecord, // kept as newest under keep period
 		pool2Min1MsRecordAB, pool2Min1MsRecordAC, pool2Min1MsRecordBC, // kept as newest under keep period
-		pool3BaseRecord, // kept as it is at the keep period boundary
+		pool3BaseRecord,    // kept as it is at the keep period boundary
 		pool4Plus1Record := // kept as it is above the keep period boundary
-	s.createTestRecordsFromTime(baseTime.Add(-recordHistoryKeepPeriod))
+		s.createTestRecordsFromTime(baseTime.Add(-recordHistoryKeepPeriod))
 
 	// non-ascending insertion order.
 	recordsToPreSet := []types.TwapRecord{
