@@ -12,6 +12,10 @@ type (
 	TimeTooOldError = timeTooOldError
 )
 
+func (k Keeper) AfterCreatePool(ctx sdk.Context, poolId uint64) error {
+	return k.afterCreatePool(ctx, poolId)
+}
+
 func (k Keeper) StoreNewRecord(ctx sdk.Context, record types.TwapRecord) {
 	k.storeNewRecord(ctx, record)
 }
