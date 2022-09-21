@@ -16,32 +16,87 @@ type StableSwapTestSuite struct {
 	test_helpers.CfmmCommonTestSuite
 }
 
-func (suite *StableSwapTestSuite) TestJoinPoolSharesInternal() {
+// func (suite *StableSwapTestSuite) TestJoinPoolSharesInternal() {
+// 	ctx := suite.CreateTestContext()
+// 	enter_exit_fee := sdk.NewDecFromInt(sdk.NewInt(0))
+// 	// stableswap := createTestPool(t, )
+// 	tests := map[string]struct {
+// 		poolAssets  []stableswap.PoolAsset
+// 		tokensIn       sdk.Coins
+// 		outputShares   sdk.Int
+// 		expectingPanic bool
+// 	}{
+// 		"single asset join": {
+// 			tokensIn:       sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(100))),
+// 			expectingPanic: false,
+// 		},
+// 		"multi asset exact ratio joins": {
+// 			tokensIn:       sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(10)), sdk.NewCoin("bar", sdk.NewInt(10))),
+// 			expectingPanic: false,
+// 		},
+// 		"multi asset exact ratio joins (big difference)": {
+// 			tokensIn:       sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(1)), sdk.NewCoin("bar", sdk.NewInt(10000000))),
+// 			expectingPanic: false,
+// 		},
+// 		"multi asset exact ratio joins (small difference)": {
+// 			tokensIn:       sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(100000)), sdk.NewCoin("bar", sdk.NewInt(100001))),
+// 			expectingPanic: false,
+// 		},
+// 	}
+// }
+
+func (suite *StableSwapTestSuite) TestCalcOutAmountGivenIn(t *testing.T) {
 	ctx := suite.CreateTestContext()
+	swapFee := sdk.ZeroDec()
+	test_pool := createTestPool(t, sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(1000)), sdk.NewCoin("bar", sdk.NewInt(1000))), swapFee, swapFee)
+	epsilon_error := 10e-9
 
 	tests := map[string]struct {
-		tokensIn       sdk.Coins
-		outputShares   sdk.Int
+		tokenIn        sdk.Coins
+		tokenOut       string
 		expectingPanic bool
 	}{
-		"single asset join": {
-			tokensIn:       sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(100))),
-			expectingPanic: false,
+		"tokenIn length != 1": {
+			tokenIn:        sdk.NewCoins(sdk.NewCoin("foo", sdk.OneInt()), sdk.NewCoin("bar", sdk.OneInt())),
+			tokenOut:       "uatom",
+			expectingPanic: true,
 		},
-		"multi asset exact ratio joins": {
-			tokensIn:       sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(100)), sdk.NewCoin("bar", sdk.NewInt(100))),
-			expectingPanic: false,
-		},
-		"multi asset exact ratio joins (big difference)": {
-			tokensIn:       sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(1)), sdk.NewCoin("bar", sdk.NewInt(10000000))),
-			expectingPanic: false,
-		},
-		"multi asset exact ratio joins (small difference)": {
-			tokensIn:       sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(100000)), sdk.NewCoin("bar", sdk.NewInt(100001))),
+		"correct output test": {
+			tokenIn:        sdk.NewCoins(sdk.NewCoin("foo", sdk.OneInt())),
+			tokenOut:       "uatom",
 			expectingPanic: false,
 		},
 	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			poolAssets := test_pool.GetTotalPoolLiquidity(ctx)
+
+			coinX, coinY :=
+				osmomath.BigDecFromSDKDec(sdk.NewDecFromInt(poolAssets[0].Amount)),
+				osmomath.BigDecFromSDKDec(sdk.NewDecFromInt(poolAssets[1].Amount))
+
+			k0 := cfmmConstant(coinX, coinY)
+
+			out, err := test_pool.CalcOutAmtGivenIn(ctx, tc.tokenIn, tc.tokenOut, swapFee)
+			if tc.expectingPanic {
+				suite.Require().Error(err)
+				return
+			}
+			suite.Require().NoError(err)
+
+			coinX, coinY =
+				osmomath.BigDecFromSDKDec(sdk.NewDecFromInt(poolAssets[0].Amount.Sub(tc.tokenIn[0].Amount))),
+				osmomath.BigDecFromSDKDec(sdk.NewDecFromInt(poolAssets[1].Amount.Add(out.Amount)))
+
+			k1 := cfmmConstant(coinX, coinY)
+
+			require.InEpsilonf(t, k0, k1, epsilon_error, fmt.Sprintf("Outside of tolerance (%f)", epsilon_error))
+		})
+	}
+
 }
+
 func TestCFMMInvariantTwoAssets(t *testing.T) {
 	kErrTolerance := osmomath.OneDec()
 
