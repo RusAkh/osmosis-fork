@@ -16,6 +16,32 @@ type StableSwapTestSuite struct {
 	test_helpers.CfmmCommonTestSuite
 }
 
+func (suite *StableSwapTestSuite) TestJoinPoolSharesInternal() {
+	ctx := suite.CreateTestContext()
+
+	tests := map[string]struct {
+		tokensIn       sdk.Coins
+		outputShares   sdk.Int
+		expectingPanic bool
+	}{
+		"single asset join": {
+			tokensIn:       sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(100))),
+			expectingPanic: false,
+		},
+		"multi asset exact ratio joins": {
+			tokensIn:       sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(100)), sdk.NewCoin("bar", sdk.NewInt(100))),
+			expectingPanic: false,
+		},
+		"multi asset exact ratio joins (big difference)": {
+			tokensIn:       sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(1)), sdk.NewCoin("bar", sdk.NewInt(10000000))),
+			expectingPanic: false,
+		},
+		"multi asset exact ratio joins (small difference)": {
+			tokensIn:       sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(100000)), sdk.NewCoin("bar", sdk.NewInt(100001))),
+			expectingPanic: false,
+		},
+	}
+}
 func TestCFMMInvariantTwoAssets(t *testing.T) {
 	kErrTolerance := osmomath.OneDec()
 
