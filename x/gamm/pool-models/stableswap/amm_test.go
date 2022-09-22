@@ -58,12 +58,12 @@ func (suite *StableSwapTestSuite) TestCalcOutAmountGivenIn(t *testing.T) {
 	}{
 		"tokenIn length != 1": {
 			tokenIn:        sdk.NewCoins(sdk.NewCoin("foo", sdk.OneInt()), sdk.NewCoin("bar", sdk.OneInt())),
-			tokenOut:       "uatom",
+			tokenOut:       "bar",
 			expectingPanic: true,
 		},
 		"correct output test": {
 			tokenIn:        sdk.NewCoins(sdk.NewCoin("foo", sdk.OneInt())),
-			tokenOut:       "uatom",
+			tokenOut:       "bar",
 			expectingPanic: false,
 		},
 	}
@@ -95,6 +95,53 @@ func (suite *StableSwapTestSuite) TestCalcOutAmountGivenIn(t *testing.T) {
 		})
 	}
 
+}
+
+func (suite *StableSwapTestSuite) TestSwapOutAmtGivenIn(t *testing.T) {
+	ctx := suite.CreateTestContext()
+	swapFee := sdk.ZeroDec()
+	test_pool := createTestPool(t, sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(1000)), sdk.NewCoin("bar", sdk.NewInt(1000))), swapFee, swapFee)
+
+	tests := map[string]struct {
+		tokenIn        sdk.Coins
+		tokenOut       string
+		expectingPanic bool
+	}{
+		"invalid tokenIn": {
+			tokenIn:        sdk.NewCoins(sdk.NewCoin("INVALID", sdk.OneInt())),
+			tokenOut:       "bar",
+			expectingPanic: true,
+		},
+		"tokenIn length != 1": {
+			tokenIn:        sdk.NewCoins(sdk.NewCoin("foo", sdk.OneInt()), sdk.NewCoin("bar", sdk.OneInt())),
+			tokenOut:       "bar",
+			expectingPanic: true,
+		},
+		"check token out": {
+			tokenIn:        sdk.NewCoins(sdk.NewCoin("foo", sdk.OneInt())),
+			tokenOut:       "bar",
+			expectingPanic: false,
+		},
+
+		// TODO: consider checking liquidity
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			out, err := test_pool.SwapOutAmtGivenIn(ctx, tc.tokenIn, tc.tokenOut, swapFee)
+
+			if tc.expectingPanic {
+				suite.Require().Error(err)
+				return
+			}
+			suite.Require().NoError(err)
+
+			out1, err := test_pool.CalcOutAmtGivenIn(ctx, tc.tokenIn, tc.tokenOut, swapFee)
+			suite.Require().NoError(err)
+			suite.Require().Equal(out, out1)
+
+		})
+	}
 }
 
 func TestCFMMInvariantTwoAssets(t *testing.T) {
