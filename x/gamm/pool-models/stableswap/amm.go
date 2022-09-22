@@ -2,6 +2,7 @@ package stableswap
 
 import (
 	"errors"
+	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -159,7 +160,8 @@ func solveCfmm(xReserve, yReserve, yIn osmomath.BigDec) osmomath.BigDec {
 	term3 := term3Numerator.Quo(bpy)
 
 	a := term1.Sub(term2).Add(term3)
-
+	fmt.Println(a)
+	fmt.Println(xReserve)
 	if a.GTE(xReserve) {
 		panic("invalid output: greater than full pool reserves")
 	}

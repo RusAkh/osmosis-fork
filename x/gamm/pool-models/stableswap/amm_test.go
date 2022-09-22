@@ -45,10 +45,10 @@ type StableSwapTestSuite struct {
 // 	}
 // }
 
-func (suite *StableSwapTestSuite) TestCalcOutAmountGivenIn(t *testing.T) {
-	ctx := suite.CreateTestContext()
+func TestCalcOutAmountGivenIn(t *testing.T) {
+	ctx := sdk.Context{}
 	swapFee := sdk.ZeroDec()
-	test_pool := createTestPool(t, sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(1000)), sdk.NewCoin("bar", sdk.NewInt(1000))), swapFee, swapFee)
+	test_pool := createTestPool(t, sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(10000000)), sdk.NewCoin("bar", sdk.NewInt(10000000))), swapFee, swapFee)
 	epsilon_error := 10e-9
 
 	tests := map[string]struct {
@@ -57,12 +57,12 @@ func (suite *StableSwapTestSuite) TestCalcOutAmountGivenIn(t *testing.T) {
 		expectingPanic bool
 	}{
 		"tokenIn length != 1": {
-			tokenIn:        sdk.NewCoins(sdk.NewCoin("foo", sdk.OneInt()), sdk.NewCoin("bar", sdk.OneInt())),
+			tokenIn:        sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(1000)), sdk.NewCoin("bar", sdk.NewInt(1000))),
 			tokenOut:       "bar",
 			expectingPanic: true,
 		},
 		"correct output test": {
-			tokenIn:        sdk.NewCoins(sdk.NewCoin("foo", sdk.OneInt())),
+			tokenIn:        sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(1000))),
 			tokenOut:       "bar",
 			expectingPanic: false,
 		},
@@ -77,13 +77,13 @@ func (suite *StableSwapTestSuite) TestCalcOutAmountGivenIn(t *testing.T) {
 				osmomath.BigDecFromSDKDec(sdk.NewDecFromInt(poolAssets[1].Amount))
 
 			k0 := cfmmConstant(coinX, coinY)
-
 			out, err := test_pool.CalcOutAmtGivenIn(ctx, tc.tokenIn, tc.tokenOut, swapFee)
+			fmt.Println("DEBUGGING", out, err)
 			if tc.expectingPanic {
-				suite.Require().Error(err)
+				require.Error(t, err)
 				return
 			}
-			suite.Require().NoError(err)
+			require.NoError(t, err)
 
 			coinX, coinY =
 				osmomath.BigDecFromSDKDec(sdk.NewDecFromInt(poolAssets[0].Amount.Sub(tc.tokenIn[0].Amount))),

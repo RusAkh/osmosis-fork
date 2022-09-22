@@ -498,7 +498,6 @@ func (p Pool) CalcOutAmtGivenIn(
 		poolAssetOut.Token.Amount.ToDec(),
 		poolAssetOut.Weight.ToDec(),
 	)
-
 	// We ignore the decimal component, as we round down the token amount out.
 	tokenAmountOutInt := tokenAmountOut.TruncateInt()
 	if !tokenAmountOutInt.IsPositive() {
