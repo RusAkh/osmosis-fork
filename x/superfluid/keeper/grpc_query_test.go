@@ -42,13 +42,13 @@ func (suite *KeeperTestSuite) TestTotalDelegationByValidatorForAsset() {
 
 		for _, result := range res.AssetResponse {
 			// check osmo equivalent is correct
-			actual_response_osmo := *result.OsmoEquivalent
+			actual_response_osmo := result.OsmoEquivalent
 			needed_response_osmo := suite.App.SuperfluidKeeper.GetSuperfluidOSMOTokens(ctx, denom, sdk.NewInt(delegation_amount))
 
 			suite.Require().Equal(actual_response_osmo, needed_response_osmo)
 
 			// check sfs'd asset amount correct
-			actual_response_asset := *result.AmountSfsd
+			actual_response_asset := result.AmountSfsd
 			needed_response_asset := sdk.NewInt(delegation_amount)
 			suite.Require().Equal(actual_response_asset, needed_response_asset)
 
