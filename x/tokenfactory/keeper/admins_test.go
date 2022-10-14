@@ -125,7 +125,7 @@ func (suite *KeeperTestSuite) TestMintDenom() {
 	}
 }
 
-func (suite *KeeperTestSuite) TestBurnDenom() { // TODO wrong error
+func (suite *KeeperTestSuite) TestBurnDenom() {
 	var addr0bal int64
 
 	// Create a denom.
@@ -276,7 +276,7 @@ func (suite *KeeperTestSuite) TestChangeAdminDenom() {
 	}
 }
 
-func (suite *KeeperTestSuite) TestSetDenomMetaData() { // TODO wrong error
+func (suite *KeeperTestSuite) TestSetDenomMetaData() {
 	// setup test
 	suite.SetupTest()
 	suite.CreateDefaultDenom()
@@ -400,7 +400,6 @@ func (suite *KeeperTestSuite) TestSetDenomMetaData() { // TODO wrong error
 				suite.Require().True(found)
 				suite.Require().Equal(tc.msgSetDenomMetadata.Metadata.Name, md.Name)
 			} else {
-				suite.Require().Error(err)
 				suite.Require().EqualError(err, tc.expectedErr.Error())
 			}
 		})
