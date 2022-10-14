@@ -55,7 +55,7 @@ func (suite *KeeperTestSuite) TestMintDenomMsg() {
 }
 
 // TestBurnDenomMsg tests TypeMsgBurn message is emitted on a successful burn
-func (suite *KeeperTestSuite) TestBurnDenomMsg() { // TODO wrong error
+func (suite *KeeperTestSuite) TestBurnDenomMsg() {
 	// Create a denom.
 	suite.CreateDefaultDenom()
 	// mint 10 default token for testAcc[0]
@@ -144,7 +144,7 @@ func (suite *KeeperTestSuite) TestCreateDenomMsg() {
 }
 
 // TestChangeAdminDenomMsg tests TypeMsgChangeAdmin message is emitted on a successful admin change
-func (suite *KeeperTestSuite) TestChangeAdminDenomMsg() { // TODO wrong error
+func (suite *KeeperTestSuite) TestChangeAdminDenomMsg() {
 	for _, tc := range []struct {
 		desc                   string
 		msgChangeAdmin         func(denom string) *types.MsgChangeAdmin
@@ -210,7 +210,7 @@ func (suite *KeeperTestSuite) TestChangeAdminDenomMsg() { // TODO wrong error
 }
 
 // TestSetDenomMetaDataMsg tests TypeMsgSetDenomMetadata message is emitted on a successful denom metadata change
-func (suite *KeeperTestSuite) TestSetDenomMetaDataMsg() { // TODO wrong error
+func (suite *KeeperTestSuite) TestSetDenomMetaDataMsg() {
 	// setup test
 	suite.SetupTest()
 	suite.CreateDefaultDenom()

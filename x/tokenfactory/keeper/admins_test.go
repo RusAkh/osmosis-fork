@@ -388,9 +388,8 @@ func (suite *KeeperTestSuite) TestSetDenomMetaData() {
 			expectedErr: types.ErrInvalidMetadata.Wrapf("metadata must contain a denomination unit with display denom '%s'", "uosmo"),
 		},
 	} {
-		suite.Run(fmt.Sprintf("Case %s", tc.desc), func() { // TODO wrong
+		suite.Run(fmt.Sprintf("Case %s", tc.desc), func() {
 			bankKeeper := suite.App.BankKeeper
-			fmt.Println("RUNNING ", tc.desc)
 			res, err := suite.msgServer.SetDenomMetadata(sdk.WrapSDKContext(suite.Ctx), &tc.msgSetDenomMetadata)
 			if tc.expectedErr == nil {
 				suite.Require().NoError(err)
