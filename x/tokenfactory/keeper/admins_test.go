@@ -276,7 +276,7 @@ func (suite *KeeperTestSuite) TestChangeAdminDenom() {
 	}
 }
 
-func (suite *KeeperTestSuite) TestSetDenomMetaData() { // TODO wrong error
+func (suite *KeeperTestSuite) TestSetDenomMetaData() {
 	// setup test
 	suite.SetupTest()
 	suite.CreateDefaultDenom()
@@ -390,7 +390,6 @@ func (suite *KeeperTestSuite) TestSetDenomMetaData() { // TODO wrong error
 	} {
 		suite.Run(fmt.Sprintf("Case %s", tc.desc), func() { // TODO wrong
 			bankKeeper := suite.App.BankKeeper
-			fmt.Println("RUNNING ", tc.desc)
 			res, err := suite.msgServer.SetDenomMetadata(sdk.WrapSDKContext(suite.Ctx), &tc.msgSetDenomMetadata)
 			if tc.expectedErr == nil {
 				suite.Require().NoError(err)
@@ -400,7 +399,6 @@ func (suite *KeeperTestSuite) TestSetDenomMetaData() { // TODO wrong error
 				suite.Require().True(found)
 				suite.Require().Equal(tc.msgSetDenomMetadata.Metadata.Name, md.Name)
 			} else {
-				suite.Require().Error(err)
 				suite.Require().EqualError(err, tc.expectedErr.Error())
 			}
 		})

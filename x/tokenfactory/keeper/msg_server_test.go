@@ -145,7 +145,7 @@ func (suite *KeeperTestSuite) TestCreateDenomMsg() {
 }
 
 // TestChangeAdminDenomMsg tests TypeMsgChangeAdmin message is emitted on a successful admin change
-func (suite *KeeperTestSuite) TestChangeAdminDenomMsg() { // TODO wrong error
+func (suite *KeeperTestSuite) TestChangeAdminDenomMsg() {
 	for _, tc := range []struct {
 		desc                   string
 		msgChangeAdmin         func(denom string) *types.MsgChangeAdmin
@@ -189,7 +189,7 @@ func (suite *KeeperTestSuite) TestChangeAdminDenomMsg() { // TODO wrong error
 			_, err = suite.msgServer.Mint(sdk.WrapSDKContext(ctx), types.NewMsgMint(suite.TestAccs[0].String(), sdk.NewInt64Coin(testDenom, 10)))
 
 			// Test change admin message
-			suite.msgServer.ChangeAdmin(sdk.WrapSDKContext(ctx), tc.msgChangeAdmin(testDenom))
+			_, err = suite.msgServer.ChangeAdmin(sdk.WrapSDKContext(ctx), tc.msgChangeAdmin(testDenom))
 			if tc.expectedChangeAdminErr == nil {
 				suite.Require().NoError(err)
 			} else {
@@ -211,7 +211,7 @@ func (suite *KeeperTestSuite) TestChangeAdminDenomMsg() { // TODO wrong error
 }
 
 // TestSetDenomMetaDataMsg tests TypeMsgSetDenomMetadata message is emitted on a successful denom metadata change
-func (suite *KeeperTestSuite) TestSetDenomMetaDataMsg() { // TODO wrong error
+func (suite *KeeperTestSuite) TestSetDenomMetaDataMsg() {
 	// setup test
 	suite.SetupTest()
 	suite.CreateDefaultDenom()
@@ -219,7 +219,7 @@ func (suite *KeeperTestSuite) TestSetDenomMetaDataMsg() { // TODO wrong error
 	for _, tc := range []struct {
 		desc                  string
 		msgSetDenomMetadata   types.MsgSetDenomMetadata
-		expectedPass          bool
+		expectedErr           error
 		expectedMessageEvents int
 	}{
 		{
@@ -241,7 +241,7 @@ func (suite *KeeperTestSuite) TestSetDenomMetaDataMsg() { // TODO wrong error
 				Name:    "OSMO",
 				Symbol:  "OSMO",
 			}),
-			expectedPass:          true,
+			expectedErr:           nil,
 			expectedMessageEvents: 1,
 		},
 		{
@@ -263,7 +263,7 @@ func (suite *KeeperTestSuite) TestSetDenomMetaDataMsg() { // TODO wrong error
 				Name:    "OSMO",
 				Symbol:  "OSMO",
 			}),
-			expectedPass: false,
+			expectedErr: types.ErrDenomDoesNotExist,
 		},
 	} {
 		suite.Run(fmt.Sprintf("Case %s", tc.desc), func() {
@@ -271,8 +271,8 @@ func (suite *KeeperTestSuite) TestSetDenomMetaDataMsg() { // TODO wrong error
 			suite.Require().Equal(0, len(ctx.EventManager().Events()))
 			// Test set denom metadata message
 			_, err := suite.msgServer.SetDenomMetadata(sdk.WrapSDKContext(ctx), &tc.msgSetDenomMetadata)
-			if !tc.expectedPass {
-				fmt.Println(err)
+			if tc.expectedErr != nil {
+				suite.Require().ErrorIs(err, tc.expectedErr)
 			}
 			// Ensure current number and type of event is emitted
 			suite.AssertEventEmitted(ctx, types.TypeMsgSetDenomMetadata, tc.expectedMessageEvents)

@@ -140,6 +140,11 @@ func (server msgServer) Burn(goCtx context.Context, msg *types.MsgBurn) (*types.
 func (server msgServer) ChangeAdmin(goCtx context.Context, msg *types.MsgChangeAdmin) (*types.MsgChangeAdminResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
+	_, denomExists := server.bankKeeper.GetDenomMetaData(ctx, msg.Denom)
+	if !denomExists {
+		return nil, types.ErrDenomDoesNotExist.Wrapf("denom: %s", msg.Denom)
+	}
+
 	authorityMetadata, err := server.Keeper.GetAuthorityMetadata(ctx, msg.Denom)
 	if err != nil {
 		return nil, err
