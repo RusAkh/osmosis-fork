@@ -33,6 +33,8 @@ import (
 	"github.com/osmosis-labs/osmosis/v12/x/lockup/client/rest"
 	"github.com/osmosis-labs/osmosis/v12/x/lockup/keeper"
 
+	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
+
 	simulation "github.com/osmosis-labs/osmosis/v12/x/lockup/simulation"
 	"github.com/osmosis-labs/osmosis/v12/x/lockup/types"
 )
@@ -191,6 +193,22 @@ func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.Val
 func (AppModule) ConsensusVersion() uint64 { return 1 }
 
 // ___________________________________________________________________________
+
+// AutoCli functions
+
+// IsOnePerModuleType implements the depinject.OnePerModuleType interface. OnePerModuleType marks a type which can have up to one value per module.
+// TODO: consider removing, might not use depinject
+func (am AppModule) IsOnePerModuleType() {}
+
+// IsAppModule implements the appmodule.AppModule interface. appmodule.AppModule interface provides no functionality itself, but is the
+// type that all valid app modules should provide so that they can be identified
+// by other modules (usually via depinject) as app modules.
+func (am AppModule) IsAppModule() {}
+
+// AutoCLIOptions implements the autocli.HasAutoCLIConfig interface. HasAutoCLIConfig is an AppModule extension interface for declaring autocli module options.
+func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
+	return types.AutoCLIOptions
+}
 
 // AppModuleSimulation functions
 
