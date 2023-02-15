@@ -28,19 +28,19 @@
 
  if [ $update_osmoutils -eq 1 ]
  then 
-     go get github.com/osmosis-labs/osmosis/osmoutils@$head_commit
+     go get github.com/pysel/osmosis/osmoutils@$head_commit
      any_updated=1
  fi
 
  if [ $update_osmomath -eq 1 ]
  then 
-     go get github.com/osmosis-labs/osmosis/osmomath@$head_commit
+     go get github.com/pysel/osmosis/osmomath@$head_commit
      any_updated=1
  fi
 
  if [ $update_ibc_hooks -eq 1 ]
  then 
-     go get github.com/osmosis-labs/osmosis/x/ibc-hooks@$head_commit
+     go get github.com/pysel/osmosis/x/ibc-hooks@$head_commit
      any_updated=1
  fi
 
