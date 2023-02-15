@@ -1,5 +1,7 @@
 module github.com/osmosis-labs/osmosis/osmoutils
 
+replace github.com/osmosis-labs/osmosis/osmoutils => github.com/pysel/osmosis/osmoutils v14.0.0
+
 go 1.19
 
 require (

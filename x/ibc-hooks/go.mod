@@ -1,5 +1,7 @@
 module github.com/osmosis-labs/osmosis/x/ibc-hooks
 
+replace github.com/osmosis-labs/osmosis/x/ibc-hooks => github.com/pysel/osmosis/x/ibc-hooks v14.0.0
+
 go 1.19
 
 require (
