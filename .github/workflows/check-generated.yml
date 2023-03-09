@@ -2,7 +2,7 @@
 #
 # Note that we run these checks regardless whether the input files have
 # changed, because generated code can change in response to toolchain updates
-# even if no files in the repository are modified.
+# even if no files in the repository are modified. non change
 name: Check generated code
 on:
   workflow_dispatch:
