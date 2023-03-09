@@ -7,6 +7,7 @@ import (
 	"github.com/osmosis-labs/osmosis/osmoutils"
 )
 
+// change in osmoutils
 var expectedOutOfGasError = types.ErrorOutOfGas{Descriptor: "my func"}
 
 func consumeGas(ctx sdk.Context, gas uint64, numTimes int) error {
