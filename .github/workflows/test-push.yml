@@ -1,4 +1,3 @@
-
 # This workflow is used in order to automatically update go.mod in case one of:
 # * osmoutils
 # * osmomath
@@ -28,13 +27,16 @@ jobs:
           go-version: '>=1.19.0'
 
       - name: Run script 
-        run: go mod tidy
+        run: |
+          COMMIT_BEFORE_PUSH=${{ github.event.before }}
+          COMMIT_AFTER_PUSH=${{ github.event.after }}
+          echo $COMMIT_AFTER_PUSH $COMMIT_BEFORE_PUSH
+          bash ./scripts/update-go-mod.sh $COMMIT_BEFORE_PUSH $COMMIT_AFTER_PUSH
 
       - name: Create pull request
         if: github.head_ref != 'create-pull-request/upgrade-go-mod' # This makes sure the PR is not created when this worflow is ran from PR's that this workflow created initially
         uses: peter-evans/create-pull-request@v4
         with: 
-          token: ${{ GITHUB_TOKEN }}
           base: main
           commit-message: Update go.mod
           delete-branch: true
