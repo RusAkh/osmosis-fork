@@ -38,10 +38,10 @@ jobs:
         run: |
           COMMIT_BEFORE_PUSH=${{ github.event.before }}
           COMMIT_AFTER_PUSH=${{ github.event.after }}
-          bash ./scripts/update-go-mod.sh $COMMIT_BEFORE_PUSH $COMMIT_AFTER_PUSH
+          echo $COMMIT_BEFORE_PUSH $COMMIT_AFTER_PUSH
+          sed -i -e "s+module github.com/osmosis-labs/osmosis/v15+module github.com/osmosis-labs/osmosis/v15  //change+" go.mod
 
       - name: Commit changes 
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          # branch: main
           commit_message: Update go.mod
