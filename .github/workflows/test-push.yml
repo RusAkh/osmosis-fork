@@ -41,7 +41,7 @@ jobs:
           echo $COMMIT_BEFORE_PUSH $COMMIT_AFTER_PUSH
           sed -i -e "s+module github.com/osmosis-labs/osmosis/v15+module github.com/osmosis-labs/osmosis/v15  //change+" go.mod
 
-      - name: Commit changes 
+      - name: Push changes 
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Update go.mod
