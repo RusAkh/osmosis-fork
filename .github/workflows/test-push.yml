@@ -1,8 +1,9 @@
 # This workflow is used in order to automatically update go.mod in case one of:
-# * osmoutils
-# * osmomath
-# * ibc-hooks
-# is updated in local branch.
+ # * osmoutils
+ # * osmomath
+ # * ibc-hooks
+ # is updated during a push to the main branch (including merged PRs)
+
 name: Go Mod Auto Version Update
 on: 
   push:
@@ -16,13 +17,20 @@ on:
 jobs:
   update_go_mod:
     runs-on: ubuntu-latest
+
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # added or changed files to the repository.
+      contents: write
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2.3.4
         with: 
           fetch-depth: 0
 
-      - uses: actions/setup-go@v3
+      - name: Setup Go
+        uses: actions/setup-go@v3
         with:
           go-version: '>=1.19.0'
 
@@ -30,18 +38,10 @@ jobs:
         run: |
           COMMIT_BEFORE_PUSH=${{ github.event.before }}
           COMMIT_AFTER_PUSH=${{ github.event.after }}
-          echo $COMMIT_AFTER_PUSH $COMMIT_BEFORE_PUSH
           bash ./scripts/update-go-mod.sh $COMMIT_BEFORE_PUSH $COMMIT_AFTER_PUSH
 
-      - name: Create pull request
-        if: github.head_ref != 'create-pull-request/upgrade-go-mod' # This makes sure the PR is not created when this worflow is ran from PR's that this workflow created initially
-        uses: peter-evans/create-pull-request@v4
-        with: 
-          base: main
-          commit-message: Update go.mod
-          delete-branch: true
-          branch: create-pull-request/upgrade-go-mod
-          title: Update go.mod
-          body: Updated go.mod due to changes in osmoutils, osmomath or x/ibc-hooks on branch ${{ github.head_ref }}
-          labels: |
-            V:state/compatible/no_backport
+      - name: Commit changes 
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          # branch: main
+          commit_message: Update go.mod
