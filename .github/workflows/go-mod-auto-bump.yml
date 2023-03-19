@@ -35,7 +35,7 @@ jobs:
       # change 1
       # This step fixes a bug, due to which the push to any branch, for example: to person-A/name, triggered this workflow on branch person-b/name,
       # and updated the go.mod on branch person-B/name with commit from branch person-A/name
-      - name: Check if the current branch contains commit that triggered the workflow aaa
+      - name: Check if the current branch contains commit that triggered the workflow bbb
         id: valid_branch 
         run: |
           CURRENT_BRANCH=${{ steps.extract_branch.outputs.CURRENT_BRANCH }}
