@@ -1,4 +1,4 @@
-module github.com/osmosis-labs/osmosis/v15
+module github.com/osmosis-labs/osmosis/v15 // change
 
 go 1.19
 
