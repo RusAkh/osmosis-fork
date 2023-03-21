@@ -46,13 +46,11 @@ jobs:
           echo "LATEST_MAIN_COMMIT=$(git rev-parse main)" >> $GITHUB_OUTPUT
 
       - name: Run script
-        if: ${{ steps.valid_branch.outputs.VALID }} == 1
         run: |
           COMMIT_AFTER_PUSH=${{ github.event.after }}
           sed -i -e 's|module github.com/osmosis-labs/osmosis/v15|module github.com/osmosis-labs/osmosis/v15 // change|g' go.mod
 
       - name: Commit changes 
-        if: ${{ steps.valid_branch.outputs.VALID }} == 1
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           branch: ${{ steps.extract_branch.outputs.CURRENT_BRANCH }}
