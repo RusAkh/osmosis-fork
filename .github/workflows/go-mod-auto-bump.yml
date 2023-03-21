@@ -31,7 +31,7 @@ jobs:
         with:
           go-version: '>=1.19.0'
 
-      # Extracts the name of the current branch
+      # Extracts the name of the current branch.
       - name: Extract Current Branch
         id: extract_branch
         run: |
