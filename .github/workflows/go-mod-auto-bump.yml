@@ -45,7 +45,7 @@ jobs:
         id: main_commit
         run: |
           echo "LATEST_MAIN_COMMIT=$(git rev-parse main)" >> $GITHUB_OUTPUT
-
+      
       - name: Run script
         if: ${{ steps.valid_branch.outputs.VALID }} == 1
         run: |
