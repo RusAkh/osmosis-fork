@@ -15,7 +15,7 @@ var (
 	zero          = ZeroDec()
 )
 
-// change q
+// change 1
 
 func TestBinarySearch(t *testing.T) {
 	// straight line function that returns input. Simplest to binary search on,
