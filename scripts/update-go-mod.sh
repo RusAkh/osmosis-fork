@@ -35,22 +35,22 @@ update_epochs=$?
 
 if [ $update_osmoutils -eq 1 ]
 then 
-	go get github.com/osmosis-labs/osmosis/osmoutils@$commit_after
+	sed -i '' 's|module github.com/osmosis-labs/osmosis/v15|module github.com/osmosis-labs/osmosis/v15 // changed osmoutils |g' go.mod
 fi
 
 if [ $update_osmomath -eq 1 ]
 then 
-	go get github.com/osmosis-labs/osmosis/osmomath@$commit_after
+	sed -i '' 's|module github.com/osmosis-labs/osmosis/v15|module github.com/osmosis-labs/osmosis/v15 // changed osmomath |g' go.mod
 fi
 
 if [ $update_ibc_hooks -eq 1 ]
 then 
-	go get github.com/osmosis-labs/osmosis/x/ibc-hooks@$commit_after
+	sed -i '' 's|module github.com/osmosis-labs/osmosis/v15|module github.com/osmosis-labs/osmosis/v15 // changed ibc-hooks |g' go.mod
 fi
 
 if [ $update_epochs -eq 1 ]
 then 
-	go get github.com/osmosis-labs/osmosis/x/epochs@$commit_after
+	sed -i '' 's|module github.com/osmosis-labs/osmosis/v15|module github.com/osmosis-labs/osmosis/v15 // changed epochs |g' go.mod
 fi
 
 go mod tidy
