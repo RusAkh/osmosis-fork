@@ -1,4 +1,4 @@
-module github.com/osmosis-labs/osmosis/v15
+module github.com/osmosis-labs/osmosis/v15 // changed osmomath (d4348229b5e81fef8e98b1f54760f384ee9519e9) (4b53aa82b0d72b45714f7c7822cf0c7fda62fc69)
 
 go 1.20
 
