@@ -15,7 +15,7 @@ var (
 	zero          = ZeroDec()
 )
 
-// forced osmomath change 2
+// forced osmomath change 3
 
 func TestBinarySearch(t *testing.T) {
 	// straight line function that returns input. Simplest to binary search on,
