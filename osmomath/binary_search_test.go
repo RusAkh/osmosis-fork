@@ -16,6 +16,7 @@ var (
 )
 
 // forced osmomath change 2
+
 func TestBinarySearch(t *testing.T) {
 	// straight line function that returns input. Simplest to binary search on,
 	// binary search directly reveals one bit of the answer in each iteration with this function.
