@@ -4,15 +4,15 @@ import (
 	gocontext "context"
 	"errors"
 
+	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/query"
 
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/balancer"
-	balancertypes "github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/balancer"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/stableswap"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/types"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/v2types"
+	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 )
 
 func (suite *KeeperTestSuite) TestCalcExitPoolCoinsFromShares() {
@@ -43,13 +43,13 @@ func (suite *KeeperTestSuite) TestCalcExitPoolCoinsFromShares() {
 			"zero share in amount",
 			poolId,
 			sdk.ZeroInt(),
-			sdkerrors.Wrapf(types.ErrInvalidMathApprox, "share ratio is zero or negative"),
+			errorsmod.Wrapf(types.ErrInvalidMathApprox, "share ratio is zero or negative"),
 		},
 		{
 			"negative share in amount",
 			poolId,
 			sdk.NewInt(-10000),
-			sdkerrors.Wrapf(types.ErrInvalidMathApprox, "share ratio is zero or negative"),
+			errorsmod.Wrapf(types.ErrInvalidMathApprox, "share ratio is zero or negative"),
 		},
 	}
 
@@ -131,7 +131,7 @@ func (suite *KeeperTestSuite) TestCalcJoinPoolNoSwapShares() {
 			"token in denom does not exist",
 			poolId,
 			sdk.NewCoins(sdk.NewCoin("random", sdk.NewInt(10000))),
-			sdkerrors.Wrapf(types.ErrDenomNotFoundInPool, "input denoms must already exist in the pool (%s)", "random"),
+			errorsmod.Wrapf(types.ErrDenomNotFoundInPool, "input denoms must already exist in the pool (%s)", "random"),
 		},
 		{
 			"join pool with incorrect amount of assets",
@@ -188,7 +188,7 @@ func (suite *KeeperTestSuite) TestPoolsWithFilter() {
 		expected_num_pools_response int
 		min_liquidity               string
 		pool_type                   string
-		poolAssets                  []balancertypes.PoolAsset
+		poolAssets                  []balancer.PoolAsset
 		expectedErr                 bool
 	}{
 		{
@@ -197,7 +197,7 @@ func (suite *KeeperTestSuite) TestPoolsWithFilter() {
 			expected_num_pools_response: 1,
 			min_liquidity:               "50000foo, 50000bar",
 			pool_type:                   "Balancer",
-			poolAssets: []balancertypes.PoolAsset{
+			poolAssets: []balancer.PoolAsset{
 				{
 					Weight: sdk.NewInt(100),
 					Token:  sdk.NewCoin("foo", sdk.NewInt(5000000)),
@@ -214,7 +214,7 @@ func (suite *KeeperTestSuite) TestPoolsWithFilter() {
 			num_pools:                   1,
 			expected_num_pools_response: 0,
 			min_liquidity:               "500000000foo, 500000000bar",
-			poolAssets: []balancertypes.PoolAsset{
+			poolAssets: []balancer.PoolAsset{
 				{
 					Weight: sdk.NewInt(100),
 					Token:  sdk.NewCoin("foo", sdk.NewInt(5000000)),
@@ -232,7 +232,7 @@ func (suite *KeeperTestSuite) TestPoolsWithFilter() {
 			expected_num_pools_response: 0,
 			min_liquidity:               "",
 			pool_type:                   "balaswap",
-			poolAssets: []balancertypes.PoolAsset{
+			poolAssets: []balancer.PoolAsset{
 				{
 					Weight: sdk.NewInt(100),
 					Token:  sdk.NewCoin("foo", sdk.NewInt(5000000)),
@@ -250,7 +250,7 @@ func (suite *KeeperTestSuite) TestPoolsWithFilter() {
 			expected_num_pools_response: 4,
 			min_liquidity:               "500foo",
 			pool_type:                   "Balancer",
-			poolAssets: []balancertypes.PoolAsset{
+			poolAssets: []balancer.PoolAsset{
 				{
 					Weight: sdk.NewInt(100),
 					Token:  sdk.NewCoin("foo", sdk.NewInt(5000000)),
@@ -267,7 +267,7 @@ func (suite *KeeperTestSuite) TestPoolsWithFilter() {
 			num_pools:                   1,
 			expected_num_pools_response: 0,
 			min_liquidity:               "500whoami",
-			poolAssets: []balancertypes.PoolAsset{
+			poolAssets: []balancer.PoolAsset{
 				{
 					Weight: sdk.NewInt(100),
 					Token:  sdk.NewCoin("foo", sdk.NewInt(5000000)),
@@ -284,7 +284,7 @@ func (suite *KeeperTestSuite) TestPoolsWithFilter() {
 			num_pools:                   1,
 			expected_num_pools_response: 6,
 			min_liquidity:               "0foo,0bar",
-			poolAssets: []balancertypes.PoolAsset{
+			poolAssets: []balancer.PoolAsset{
 				{
 					Weight: sdk.NewInt(100),
 					Token:  sdk.NewCoin("foo", sdk.NewInt(5000000)),
@@ -301,7 +301,7 @@ func (suite *KeeperTestSuite) TestPoolsWithFilter() {
 			num_pools:                   1,
 			expected_num_pools_response: 7,
 			pool_type:                   "Balancer",
-			poolAssets: []balancertypes.PoolAsset{
+			poolAssets: []balancer.PoolAsset{
 				{
 					Weight: sdk.NewInt(100),
 					Token:  sdk.NewCoin("foo", sdk.NewInt(5000000)),
@@ -319,7 +319,7 @@ func (suite *KeeperTestSuite) TestPoolsWithFilter() {
 			expected_num_pools_response: 1,
 			min_liquidity:               "wrong300foo",
 			pool_type:                   "Balancer",
-			poolAssets: []balancertypes.PoolAsset{
+			poolAssets: []balancer.PoolAsset{
 				{
 					Weight: sdk.NewInt(100),
 					Token:  sdk.NewCoin("foo", sdk.NewInt(5000000)),
@@ -395,7 +395,7 @@ func (suite *KeeperTestSuite) TestCalcJoinPoolShares() {
 			"token in denom does not exist",
 			poolId,
 			sdk.NewCoins(sdk.NewCoin("random", sdk.NewInt(10000))),
-			sdkerrors.Wrapf(types.ErrDenomNotFoundInPool, "input denoms must already exist in the pool (%s)", "random"),
+			errorsmod.Wrapf(types.ErrDenomNotFoundInPool, "input denoms must already exist in the pool (%s)", "random"),
 		},
 		{
 			"join pool with incorrect amount of assets",
@@ -455,7 +455,7 @@ func (suite *KeeperTestSuite) TestQueryPool() {
 		err = suite.App.InterfaceRegistry().UnpackAny(poolRes.Pool, &pool)
 		suite.Require().NoError(err)
 		suite.Require().Equal(poolId, pool.GetId())
-		suite.Require().Equal(types.NewPoolAddress(poolId).String(), pool.GetAddress().String())
+		suite.Require().Equal(poolmanagertypes.NewPoolAddress(poolId).String(), pool.GetAddress().String())
 	}
 }
 
@@ -472,7 +472,7 @@ func (suite *KeeperTestSuite) TestQueryPools() {
 		err = suite.App.InterfaceRegistry().UnpackAny(poolRes.Pool, &pool)
 		suite.Require().NoError(err)
 		suite.Require().Equal(poolId, pool.GetId())
-		suite.Require().Equal(types.NewPoolAddress(poolId).String(), pool.GetAddress().String())
+		suite.Require().Equal(poolmanagertypes.NewPoolAddress(poolId).String(), pool.GetAddress().String())
 	}
 
 	res, err := queryClient.Pools(gocontext.Background(), &types.QueryPoolsRequest{
@@ -488,7 +488,7 @@ func (suite *KeeperTestSuite) TestQueryPools() {
 		var pool types.CFMMPoolI
 		err = suite.App.InterfaceRegistry().UnpackAny(r, &pool)
 		suite.Require().NoError(err)
-		suite.Require().Equal(types.NewPoolAddress(uint64(1)).String(), pool.GetAddress().String())
+		suite.Require().Equal(poolmanagertypes.NewPoolAddress(uint64(1)).String(), pool.GetAddress().String())
 		suite.Require().Equal(uint64(1), pool.GetId())
 	}
 
@@ -505,7 +505,7 @@ func (suite *KeeperTestSuite) TestQueryPools() {
 		var pool types.CFMMPoolI
 		err = suite.App.InterfaceRegistry().UnpackAny(r, &pool)
 		suite.Require().NoError(err)
-		suite.Require().Equal(types.NewPoolAddress(uint64(i+1)).String(), pool.GetAddress().String())
+		suite.Require().Equal(poolmanagertypes.NewPoolAddress(uint64(i+1)).String(), pool.GetAddress().String())
 		suite.Require().Equal(uint64(i+1), pool.GetId())
 	}
 }
@@ -652,7 +652,7 @@ func (suite *KeeperTestSuite) TestQueryBalancerPoolSpotPrice() {
 		result    string
 	}{
 		{
-			name: "non-existant pool",
+			name: "non-existent pool",
 			req: &types.QuerySpotPriceRequest{
 				PoolId:          0,
 				BaseAssetDenom:  "foo",
@@ -743,7 +743,7 @@ func (suite *KeeperTestSuite) TestV2QueryBalancerPoolSpotPrice() {
 		result    string
 	}{
 		{
-			name: "non-existant pool",
+			name: "non-existent pool",
 			req: &v2types.QuerySpotPriceRequest{
 				PoolId:          0,
 				BaseAssetDenom:  "tokenA",

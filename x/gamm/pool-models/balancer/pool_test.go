@@ -14,15 +14,16 @@ import (
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/balancer"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/internal/test_helpers"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/types"
+	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 )
 
 var (
 	defaultSwapFee            = sdk.MustNewDecFromStr("0.025")
-	defaultExitFee            = sdk.MustNewDecFromStr("0.025")
+	defaultZeroExitFee        = sdk.ZeroDec()
 	defaultPoolId             = uint64(10)
 	defaultBalancerPoolParams = balancer.PoolParams{
 		SwapFee: defaultSwapFee,
-		ExitFee: defaultExitFee,
+		ExitFee: defaultZeroExitFee,
 	}
 	defaultFutureGovernor = ""
 	defaultCurBlockTime   = time.Unix(1618700000, 0)
@@ -381,7 +382,7 @@ func TestCalcJoinSingleAssetTokensIn(t *testing.T) {
 	}
 }
 
-// TestGetPoolAssetsByDenom tests if `GetPoolAssetsByDenom` succesfully creates a map of denom to pool asset
+// TestGetPoolAssetsByDenom tests if `GetPoolAssetsByDenom` successfully creates a map of denom to pool asset
 // given pool asset as parameter
 func TestGetPoolAssetsByDenom(t *testing.T) {
 	testCases := []struct {
@@ -569,7 +570,8 @@ func (suite *BalancerTestSuite) TestBalancerCalculateAmountOutAndIn_InverseRelat
 				suite.Require().NotNil(pool)
 
 				errTolerance := osmomath.ErrTolerance{
-					AdditiveTolerance: sdk.OneDec(), MultiplicativeTolerance: sdk.Dec{}}
+					AdditiveTolerance: sdk.OneDec(), MultiplicativeTolerance: sdk.Dec{},
+				}
 				sut := func() {
 					test_helpers.TestCalculateAmountOutAndIn_InverseRelationship(suite.T(), ctx, pool, poolAssetIn.Token.Denom, poolAssetOut.Token.Denom, tc.initialCalcOut, swapFeeDec, errTolerance)
 				}
@@ -583,7 +585,6 @@ func (suite *BalancerTestSuite) TestBalancerCalculateAmountOutAndIn_InverseRelat
 func TestCalcSingleAssetInAndOut_InverseRelationship(t *testing.T) {
 	type testcase struct {
 		initialPoolOut   int64
-		initialPoolIn    int64
 		initialWeightOut int64
 		tokenOut         int64
 		initialWeightIn  int64
@@ -692,6 +693,7 @@ func TestCalcSingleAssetInAndOut_InverseRelationship(t *testing.T) {
 
 // Expected is un-scaled
 func testTotalWeight(t *testing.T, expected sdk.Int, pool balancer.Pool) {
+	t.Helper()
 	scaledExpected := expected.MulRaw(balancer.GuaranteedWeightPrecision)
 	require.Equal(t,
 		scaledExpected.String(),
@@ -967,7 +969,7 @@ func TestLBPParamsEmptyStartTime(t *testing.T) {
 	pacc, err := balancer.NewBalancerPool(defaultPoolId, balancer.PoolParams{
 		SmoothWeightChangeParams: &params,
 		SwapFee:                  defaultSwapFee,
-		ExitFee:                  defaultExitFee,
+		ExitFee:                  defaultZeroExitFee,
 	}, initialPoolAssets, defaultFutureGovernor, defaultCurBlockTime)
 	require.NoError(t, err)
 
@@ -1159,7 +1161,7 @@ func TestBalancerPoolPokeTokenWeights(t *testing.T) {
 		// Initialize the pool
 		pacc, err := balancer.NewBalancerPool(uint64(poolId), balancer.PoolParams{
 			SwapFee:                  defaultSwapFee,
-			ExitFee:                  defaultExitFee,
+			ExitFee:                  defaultZeroExitFee,
 			SmoothWeightChangeParams: &tc.params,
 		}, initialPoolAssets, defaultFutureGovernor, defaultCurBlockTime)
 		require.NoError(t, err, "poolId %v", poolId)
@@ -1337,9 +1339,9 @@ func TestCalcJoinPoolNoSwapShares(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			ctx := sdk.Context{}
 			balancerPool := balancer.Pool{
-				Address:            types.NewPoolAddress(defaultPoolId).String(),
+				Address:            poolmanagertypes.NewPoolAddress(defaultPoolId).String(),
 				Id:                 defaultPoolId,
-				PoolParams:         balancer.PoolParams{SwapFee: defaultSwapFee, ExitFee: defaultExitFee},
+				PoolParams:         balancer.PoolParams{SwapFee: defaultSwapFee, ExitFee: defaultZeroExitFee},
 				PoolAssets:         test.poolAssets,
 				FuturePoolGovernor: defaultFutureGovernor,
 				TotalShares:        sdk.NewCoin(types.GetPoolShareDenom(defaultPoolId), types.InitPoolSharesSupply),

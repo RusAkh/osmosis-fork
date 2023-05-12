@@ -10,27 +10,17 @@ import (
 	"github.com/osmosis-labs/osmosis/v15/tests/mocks"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/keeper"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/balancer"
-	balancertypes "github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/balancer"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/stableswap"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/types"
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 )
 
 var (
-	defaultPoolAssetsStableSwap = sdk.Coins{
-		sdk.NewCoin("atom", sdk.NewInt(100)),
-		sdk.NewCoin("osmo", sdk.NewInt(100)),
-	}
 	defaultPoolParamsStableSwap = stableswap.PoolParams{
 		SwapFee: sdk.NewDecWithPrec(1, 2),
-		ExitFee: sdk.NewDecWithPrec(1, 2),
+		ExitFee: sdk.ZeroDec(),
 	}
-	defaultPoolId                        = uint64(1)
-	defaultAcctFundsStableSwap sdk.Coins = sdk.NewCoins(
-		sdk.NewCoin("uosmo", sdk.NewInt(10000000000)),
-		sdk.NewCoin("atom", sdk.NewInt(100)),
-		sdk.NewCoin("osmo", sdk.NewInt(100)),
-	)
+	defaultPoolId = uint64(1)
 )
 
 // import (
@@ -264,10 +254,10 @@ func (suite *KeeperTestSuite) TestGetPoolAndPoke() {
 
 	// N.B.: We make a copy because SmoothWeightChangeParams get mutated.
 	// We would like to avoid mutating global pool assets that are used in other tests.
-	defaultPoolAssetsCopy := make([]balancertypes.PoolAsset, 2)
+	defaultPoolAssetsCopy := make([]balancer.PoolAsset, 2)
 	copy(defaultPoolAssetsCopy, defaultPoolAssets)
 
-	startPoolWeightAssets := []balancertypes.PoolAsset{
+	startPoolWeightAssets := []balancer.PoolAsset{
 		{
 			Weight: defaultPoolAssets[0].Weight.Quo(sdk.NewInt(2)),
 			Token:  defaultPoolAssets[0].Token,
@@ -286,7 +276,7 @@ func (suite *KeeperTestSuite) TestGetPoolAndPoke() {
 			isPokePool: true,
 			poolId: suite.prepareCustomBalancerPool(defaultAcctFunds, startPoolWeightAssets, balancer.PoolParams{
 				SwapFee: defaultSwapFee,
-				ExitFee: defaultExitFee,
+				ExitFee: defaultZeroExitFee,
 				SmoothWeightChangeParams: &balancer.SmoothWeightChangeParams{
 					StartTime:          time.Unix(startTime, 0), // start time is before block time so the weights should change
 					Duration:           time.Hour,
@@ -300,7 +290,7 @@ func (suite *KeeperTestSuite) TestGetPoolAndPoke() {
 				defaultAcctFunds,
 				stableswap.PoolParams{
 					SwapFee: defaultSwapFee,
-					ExitFee: defaultExitFee,
+					ExitFee: defaultZeroExitFee,
 				},
 				sdk.NewCoins(sdk.NewCoin(defaultAcctFunds[0].Denom, defaultAcctFunds[0].Amount.QuoRaw(2)), sdk.NewCoin(defaultAcctFunds[1].Denom, defaultAcctFunds[1].Amount.QuoRaw(2))),
 				[]uint64{1, 1},
@@ -379,7 +369,6 @@ func (suite *KeeperTestSuite) TestConvertToCFMMPool() {
 // change the underlying bytes. This shows that migrations are
 // not necessary.
 func (suite *KeeperTestSuite) TestMarshalUnmarshalPool() {
-
 	suite.SetupTest()
 	k := suite.App.GAMMKeeper
 
@@ -502,7 +491,7 @@ func (suite *KeeperTestSuite) TestSetStableSwapScalingFactors() {
 					defaultAcctFunds,
 					stableswap.PoolParams{
 						SwapFee: defaultSwapFee,
-						ExitFee: defaultExitFee,
+						ExitFee: defaultZeroExitFee,
 					},
 					sdk.NewCoins(sdk.NewCoin(defaultAcctFunds[0].Denom, defaultAcctFunds[0].Amount.QuoRaw(2)), sdk.NewCoin(defaultAcctFunds[1].Denom, defaultAcctFunds[1].Amount.QuoRaw(2))),
 					tc.scalingFactors,
@@ -510,7 +499,8 @@ func (suite *KeeperTestSuite) TestSetStableSwapScalingFactors() {
 				pool, _ := suite.App.GAMMKeeper.GetPoolAndPoke(suite.Ctx, poolId)
 				stableswapPool, _ := pool.(*stableswap.Pool)
 				stableswapPool.ScalingFactorController = controllerAddr.String()
-				suite.App.GAMMKeeper.SetPool(suite.Ctx, stableswapPool)
+				err := suite.App.GAMMKeeper.SetPool(suite.Ctx, stableswapPool)
+				suite.Require().NoError(err)
 			} else {
 				suite.prepareCustomBalancerPool(
 					defaultAcctFunds,
@@ -526,5 +516,4 @@ func (suite *KeeperTestSuite) TestSetStableSwapScalingFactors() {
 			}
 		})
 	}
-
 }

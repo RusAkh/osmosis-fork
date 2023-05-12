@@ -627,20 +627,28 @@ osmosisd query protorev params
 | query protorev | all-profits | Queries all ProtoRev profits |
 | query protorev | statistics-by-route [route] where route is the list of pool ids i.e. [1,2,3] | Queries ProtoRev statistics by route |
 | query protorev | all-statistics | Queries all ProtoRev statistics |
-| query protorev | token-pair-arb-routes | Queries the ProtoRev token pair arb routes |
+| query protorev | hot-routes | Queries the ProtoRev token pair arb routes |
 | query protorev | admin-account | Queries the ProtoRev admin account |
 | query protorev | developer-account | Queries the ProtoRev developer account |
 | query protorev | max-pool-points-per-tx | Queries the ProtoRev max pool points per transaction |
 | query protorev | max-pool-points-per-block | Queries the ProtoRev max pool points per block |
 | query protorev | base-denoms | Queries the ProtoRev base denoms used to create cyclic arbitrage routes |
 | query protorev | enabled | Queries whether the ProtoRev module is currently enabled |
+| query protorev | pool-weights | Queries the pool weights used to determine how computationally expensive a route is |
+| query protorev | pool | Queries the pool id for a given denom pair stored in ProtoRev |
 
 ### Proposals
 
 | Command | Subcommand | Description |
 | --- | --- | --- |
-| tx protorev | set-protorev-admin-account-proposal [sdk.AccAddress] | Submit a proposal to set the admin account for ProtoRev |
-| tx protorev | set-protorev-enabled-proposal [boolean] | Submit a proposal to disable/enable the ProtoRev module |
+| tx protorev | set-pool-weights [path/to/file.json] | Submit a tx to set the pool weights for ProtoRev |
+| tx protorev | set-hot-routes [path/to/file.json] | Submit a tx to set the hot routes for ProtoRev |
+| tx protorev | set-base-denoms [path/to/file.json] | Submit a tx to set the base denoms for ProtoRev |
+| tx protorev | set-max-pool-points-per-block [uint64] | Submit a tx to set the max pool points per block for ProtoRev |
+| tx protorev | set-max-pool-points-per-tx [uint64] | Submit a tx to set the max pool points per transaction for ProtoRev |
+| tx protorev | set-developer-account [sdk.AccAddress] | Submit a tx to set the developer account for ProtoRev |
+| tx protorev | set-admin-account-proposal [sdk.AccAddress] | Submit a proposal to set the admin account for ProtoRev |
+| tx protorev | set-enabled-proposal [boolean] | Submit a proposal to disable/enable the ProtoRev module |
 
 ## gRPC & REST
 
@@ -662,6 +670,7 @@ osmosisd query protorev params
 | gRPC | osmosis.v14.protorev.Query/GetProtoRevBaseDenoms | Queries the ProtoRev base denoms used to create cyclic arbitrage routes |
 | gRPC | osmosis.v14.protorev.Query/GetProtoRevEnabled | Queries whether the ProtoRev module is currently enabled |
 | gRPC | osmosis.14.protorev.Query/GetProtoRevPoolWeights | Queries the number of pool points each pool type will consume when executing and simulating trades |
+| gRPC | osmosis.14.protorev.Query/GetProtoRevPool | Queries the pool id for a given denom pair stored in ProtoRev |
 | GET | /osmosis/v14/protorev/params | Queries the parameters of the module |
 | GET | /osmosis/v14/protorev/number_of_trades | Queries the number of arbitrage trades the module has executed |
 | GET | /osmosis/v14/protorev/profits_by_denom | Queries the profits of the module by denom |
@@ -676,6 +685,7 @@ osmosisd query protorev params
 | GET | /osmosis/v14/protorev/base_denoms | Queries the base denominations ProtoRev is currently using to create cyclic arbitrage routes |
 | GET | /osmosis/v14/protorev/enabled | Queries whether the ProtoRev module is currently enabled |
 | GET | /osmosis/v14/protorev/pool_weights | Queries the number of pool points each pool type will consume when executing and simulating trades |
+| GET | /osmosis/v14/protorev/pool | Queries the pool id for a given denom pair stored in ProtoRev |
 
 ### Transactions
 
@@ -693,3 +703,38 @@ osmosisd query protorev params
 | POST | /osmosis/v14/protorev/set_max_pool_points_per_block | Sets the maximum number of pool points that can be consumed per block |
 | POST | /osmosis/v14/protorev/set_pool_weights | Sets the amount of pool points each pool type will consume when executing and simulating trades |
 | POST | /osmosis/v14/protorev/set_base_denoms | Sets the base denominations that will be used by ProtoRev to construct cyclic arbitrage routes |
+
+## Events
+
+There is 1 type of event that exists in ProtoRev:
+
+* `types.TypeEvtBackrun` - "protorev_backrun"
+
+### `types.TypeEvtBackrun`
+
+This event is emitted after ProtoRev succesfully backruns a transaction.
+
+It consists of the following attributes:
+
+* `types.AttributeValueCategory` - "ModuleName"
+  * The value is the module's name - "protorev".
+* `types.AttributeKeyUserPoolId`
+  * The value is the pool id that the user swapped on that ProtoRev backran.
+* `types.AttributeKeyTxHash`
+  * The value is the transaction hash that ProtoRev backran.
+* `types.AttributeKeyUserDenomIn`
+  * The value is the user denom in for the swap ProtoRev backran.
+* `types.AttributeKeyUserDenomOut`
+  * The value is the user denom out for the swap ProtoRev backran.
+* `types.AttributeKeyBlockPoolPointsRemaining`
+  * The value is the remaining block pool points ProtoRev can still use after the backrun.
+* `types.AttributeKeyTxPoolPointsRemaining`
+  * The value is the remaining tx pool points ProtoRev can still use after the backrun.
+* `types.AttributeKeyProtorevProfit`
+  * The value is the profit ProtoRev captured through the backrun.
+* `types.AttributeKeyProtorevAmountIn`
+  * The value is the amount Protorev swapped in to execute the backrun.
+* `types.AttributeKeyProtorevAmountOut`
+  * The value is the amount Protorev got out of the backrun swap.
+* `types.AttributeKeyProtorevArbDenom`
+  * The value is the denom that ProtoRev swapped in/out to execute the backrun.

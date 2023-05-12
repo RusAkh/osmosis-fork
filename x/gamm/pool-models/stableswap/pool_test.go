@@ -13,6 +13,7 @@ import (
 	"github.com/osmosis-labs/osmosis/osmoutils/osmoassert"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/internal/cfmm_common"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/types"
+	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 )
 
 var (
@@ -67,7 +68,7 @@ func poolStructFromAssets(assets sdk.Coins, scalingFactors []uint64) Pool {
 	scalingFactors, _ = applyScalingFactorMultiplier(scalingFactors)
 
 	p := Pool{
-		Address:            types.NewPoolAddress(defaultPoolId).String(),
+		Address:            poolmanagertypes.NewPoolAddress(defaultPoolId).String(),
 		Id:                 defaultPoolId,
 		PoolParams:         defaultStableswapPoolParams,
 		TotalShares:        sdk.NewCoin(types.GetPoolShareDenom(defaultPoolId), types.InitPoolSharesSupply),
@@ -959,8 +960,9 @@ func TestInverseJoinPoolExitPool(t *testing.T) {
 			}
 
 			// we join then exit the pool
-			shares, err := p.JoinPool(ctx, tc.tokensIn, tc.swapFee)
+			shares, _ := p.JoinPool(ctx, tc.tokensIn, tc.swapFee)
 			tokenOut, err := p.ExitPool(ctx, shares, defaultExitFee)
+			require.NoError(t, err)
 
 			// if single asset join, we swap output tokens to input denom to test the full inverse relationship
 			if len(tc.tokensIn) == 1 {
@@ -1364,7 +1366,6 @@ func TestStableswapSpotPrice(t *testing.T) {
 }
 
 func TestValidateScalingFactors(t *testing.T) {
-
 	tests := map[string]struct {
 		scalingFactors []uint64
 		numAssets      int
