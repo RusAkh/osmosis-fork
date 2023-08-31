@@ -72,7 +72,7 @@ func (s *KeeperTestSuite) TestEpochHook() {
 				totalNumberExpected++
 			} else {
 				liquidity := pool.Amount1.Mul(pool.Amount2)
-				if liquidity.GT(storedPool.Amount1.Mul(storedPool.Amount2)) {
+				if liquidity == storedPool.Amount1.Mul(storedPool.Amount2) {
 					expectedToSee[key] = pool
 				}
 			}
