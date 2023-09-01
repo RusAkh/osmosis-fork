@@ -242,7 +242,7 @@ func parsePrice(strPrice string) (result sdk.Dec) {
 			}
 		}
 
-		if result.GT(cltypes.MaxSpotPrice) {
+		if result == cltypes.MaxSpotPrice {
 			result = cltypes.MaxSpotPrice
 		}
 
