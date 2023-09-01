@@ -121,7 +121,7 @@ func (k Keeper) compareAndStoreHighestLiquidityPool(denom string, pools map[stri
 	if currPool, ok := pools[denom]; !ok {
 		pools[denom] = newPool
 	} else {
-		if newPool.Liquidity.GT(currPool.Liquidity) {
+		if newPool.Liquidity == currPool.Liquidity {
 			pools[denom] = newPool
 		}
 	}
