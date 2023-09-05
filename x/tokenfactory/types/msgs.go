@@ -88,7 +88,7 @@ func (m MsgMint) ValidateBasic() error {
 	return nil
 }
 
-func (m MsgMint) GetSignBytes() []byte {
+func (m MsgMint) GetSignBytes() []byte { // trigger
 	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&m))
 }
 
