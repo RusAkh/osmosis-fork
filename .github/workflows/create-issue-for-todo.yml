@@ -1,0 +1,40 @@
+name: Create Issue for TODO
+
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  create_issue_for_todo:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true && github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Get diff
+      run: |
+        git fetch origin main:main
+        echo "DIFF=$(git diff main...${{ github.sha }})" >> $GITHUB_ENV
+
+    - name: Create issues for TODOs
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        IFS=$'\n' read -ra TODOs <<< "$(echo "$DIFF" | grep -o 'TODO:.*')"
+        AUTHOR="${{ github.actor }}"
+
+        for todo in "${TODOs[@]}"; do
+          echo "Creating issue for: $todo"
+          
+          issue=$(curl -s -X POST https://api.github.com/repos/${{ github.repository }}/issues \
+          -H "Authorization: token $GH_TOKEN" \
+          -d '{
+            "title": "'"$todo"'",
+            "body": "This issue is auto-generated.",
+            "assignees": ["'"$AUTHOR"'"],
+            "labels": ["T:auto"]
+          }')
+        done
