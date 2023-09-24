@@ -11,6 +11,7 @@ import (
 )
 
 // event is the interface all event types should be implementing
+// TODO: get rid of this interface
 type event interface {
 	emit(ctx sdk.Context)
 }
