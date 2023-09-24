@@ -20,6 +20,7 @@ import (
 	"github.com/osmosis-labs/osmosis/v19/x/concentrated-liquidity/types/genesis"
 )
 
+// TODO: get rid of singlePoolGenesisEntry struct
 type singlePoolGenesisEntry struct {
 	pool                    model.Pool
 	tick                    []genesis.FullTick
