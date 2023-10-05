@@ -16,6 +16,7 @@ type event interface {
 }
 
 // guarantee that liquidityChangeEvent type implements the event interface
+// TODO: fix this
 var _ event = &liquidityChangeEvent{}
 
 // liquidityChangeEvent represent the fields used for event emission
