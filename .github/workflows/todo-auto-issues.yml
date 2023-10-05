@@ -34,7 +34,7 @@ jobs:
         # Read TODOs from the output
         SAVEIFS=$IFS   # Save current IFS (Internal Field Separator)
         IFS=$'\n'      # Change IFS to newline char
-        todos=("${{ steps.todos.outputs.todo_list }}") # split the `names` string into an array by the same name
+        todos=("${{ steps.todos.outputs.todo_list }}") # split the `todo_list` string into an array by the same name
         IFS=$SAVEIFS   # Restore original IFS
         
         # Create an issue for each TODO
