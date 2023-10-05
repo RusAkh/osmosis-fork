@@ -12,12 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true
     steps:
-    - name: Print Current Branch
-      run: echo $(git branch --show-current)
-      
     - name: Checkout code
       uses: actions/checkout@v3
       with:
+        fetch-depth: 0
         ref: ${{ github.event.pull_request.merge_commit_sha }}
     
     - name: Scan for TODOs
