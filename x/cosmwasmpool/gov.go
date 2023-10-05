@@ -12,6 +12,7 @@ import (
 	"github.com/osmosis-labs/osmosis/v19/x/cosmwasmpool/types"
 )
 
+// TODO: modify this to use the new proposal types.
 func NewCosmWasmPoolProposalHandler(k Keeper) govtypes.Handler {
 	return func(ctx sdk.Context, content govtypes.Content) error {
 		switch c := content.(type) {
