@@ -38,6 +38,7 @@ jobs:
         IFS=$SAVEIFS   # Restore original IFS
         
         # Create an issue for each TODO
+        # TODO: testing
         for todo in "${todos[@]}"; do
           echo "Creating issue for TODO: $todo"
           curl -L \
