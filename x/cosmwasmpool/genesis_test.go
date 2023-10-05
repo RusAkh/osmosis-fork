@@ -9,6 +9,7 @@ import (
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 )
 
+// TODO: remove this test
 func (s *PoolModuleSuite) TestInitGenesis() {
 	s.Setup()
 
